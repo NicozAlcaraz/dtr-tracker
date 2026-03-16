@@ -1,9 +1,10 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-// 1. Added 'type' keyword here
 import type { Id } from "../../convex/_generated/dataModel";
 import { X, AlertCircle, Trash2 } from "lucide-react";
+// 1. We import parseISO to safely read the backend timestamps
+import { format, parseISO } from "date-fns";
 
 interface ManualEntryModalProps {
   isOpen: boolean;
@@ -31,10 +32,13 @@ export default function ManualEntryModal({ isOpen, onClose, userId, selectedDate
 
   useEffect(() => {
     if (isOpen) {
-      setDate(selectedDate || new Date().toISOString().split("T")[0]);
+      // Safely initialize the date picker with the local timezone date
+      setDate(selectedDate || format(new Date(), "yyyy-MM-dd"));
+
       if (existingLog) {
-        setTimeIn(existingLog.timeIn.split("T")[1].substring(0, 5));
-        setTimeOut(existingLog.timeOut ? existingLog.timeOut.split("T")[1].substring(0, 5) : "");
+        // Safely convert the database's UTC strings into local "HH:mm" for the inputs
+        setTimeIn(format(parseISO(existingLog.timeIn), "HH:mm"));
+        setTimeOut(existingLog.timeOut ? format(parseISO(existingLog.timeOut), "HH:mm") : "");
       } else {
         setTimeIn("");
         setTimeOut("");
@@ -43,8 +47,14 @@ export default function ManualEntryModal({ isOpen, onClose, userId, selectedDate
     }
   }, [isOpen, selectedDate, existingLog]);
 
+  // Safely combine the form inputs back into an ISO timestamp
   const createIsoString = (dateStr: string, timeStr: string) => {
-    return new Date(`${dateStr}T${timeStr}`).toISOString();
+    const combinedDate = new Date(`${dateStr}T${timeStr}`);
+    // Check if JavaScript failed to parse the combination
+    if (isNaN(combinedDate.getTime())) {
+      throw new Error("Invalid time format detected.");
+    }
+    return combinedDate.toISOString();
   };
 
   const handleDelete = async () => {
@@ -56,14 +66,12 @@ export default function ManualEntryModal({ isOpen, onClose, userId, selectedDate
       await deleteEntry({ id: existingLog._id });
       onClose();
     } catch (err) {
-      // 2. We now actually use the 'err' variable to show a specific error message
       setError(err instanceof Error ? err.message : "Failed to delete entry.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // 3. Replaced React.FormEvent with the directly imported FormEvent<HTMLFormElement>
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
@@ -111,7 +119,7 @@ export default function ManualEntryModal({ isOpen, onClose, userId, selectedDate
           <h2 className="text-xl font-semibold text-gray-800">
             {existingLog ? "Edit Entry" : "Add Manual Entry"}
           </h2>
-          <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md">
+          <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -129,7 +137,7 @@ export default function ManualEntryModal({ isOpen, onClose, userId, selectedDate
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
               disabled={!!existingLog}
               required
             />
@@ -138,11 +146,11 @@ export default function ManualEntryModal({ isOpen, onClose, userId, selectedDate
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">Time In</label>
-              <input type="time" value={timeIn} onChange={(e) => setTimeIn(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
+              <input type="time" value={timeIn} onChange={(e) => setTimeIn(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow" required />
             </div>
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">Time Out</label>
-              <input type="time" value={timeOut} onChange={(e) => setTimeOut(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
+              <input type="time" value={timeOut} onChange={(e) => setTimeOut(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow" required />
             </div>
           </div>
 
@@ -154,10 +162,10 @@ export default function ManualEntryModal({ isOpen, onClose, userId, selectedDate
             ) : <div></div>}
 
             <div className="flex gap-3">
-              <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50">
+              <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors">
                 Cancel
               </button>
-              <button type="submit" disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50">
+              <button type="submit" disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
                 {isSubmitting ? "Saving..." : "Save"}
               </button>
             </div>
