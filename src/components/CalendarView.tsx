@@ -23,29 +23,29 @@ export default function CalendarView({ logs, onDayClick }: CalendarViewProps) {
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-6 w-full max-w-full overflow-hidden">
+    <div className="bg-black rounded-xl shadow-sm border border-black p-3 sm:p-6 w-full max-w-full overflow-hidden">
       {/* Calendar Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 mb-4 sm:mb-6">
-        <h2 className="text-lg sm:text-xl font-bold text-gray-800">
+        <h2 className="text-lg sm:text-xl font-bold text-white">
           {format(currentDate, "MMMM yyyy")}
         </h2>
         <div className="flex gap-1 sm:gap-2 w-full sm:w-auto justify-between sm:justify-end">
           <button
             onClick={prevMonth}
-            className="p-2 hover:bg-gray-100 rounded-lg touch-manipulation transition-colors"
+            className="p-2 hover:bg-gray-500 rounded-lg text-white touch-manipulation transition-colors"
             aria-label="Previous month"
           >
             <ChevronLeft size={20} />
           </button>
           <button
             onClick={() => setCurrentDate(new Date())}
-            className="px-4 py-2 sm:px-3 sm:py-1 text-sm font-medium hover:bg-gray-100 rounded-lg touch-manipulation transition-colors flex-1 sm:flex-none"
+            className="px-4 py-2 sm:px-3 sm:py-1 text-sm text-white font-medium hover:bg-gray-500 rounded-lg touch-manipulation transition-colors flex-1 sm:flex-none"
           >
             Today
           </button>
           <button
             onClick={nextMonth}
-            className="p-2 hover:bg-gray-100 rounded-lg touch-manipulation transition-colors"
+            className="p-2 hover:bg-gray-500 rounded-lg text-white touch-manipulation transition-colors"
             aria-label="Next month"
           >
             <ChevronRight size={20} />
@@ -54,7 +54,7 @@ export default function CalendarView({ logs, onDayClick }: CalendarViewProps) {
       </div>
 
       {/* Days of Week */}
-      <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-xs sm:text-sm font-medium text-gray-500">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-xs sm:text-sm font-medium text-white">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
           <div key={day} className="truncate" title={day}>
             {/* Show 1 letter on ultra-small screens, full 3 letters on bigger screens */}
@@ -77,13 +77,13 @@ export default function CalendarView({ logs, onDayClick }: CalendarViewProps) {
               key={day.toString()}
               onClick={() => onDayClick(dateStr, dailyLog)}
               className={`
-                min-h-[64px] sm:min-h-[80px] p-1 sm:p-2 rounded-lg border cursor-pointer transition-all hover:border-blue-400 hover:shadow-sm flex flex-col justify-between touch-manipulation overflow-hidden
+                min-h-[64px] sm:min-h-[80px] p-1 sm:p-2 rounded-lg border cursor-pointer transition-all hover:border-purple-600 hover:shadow-2xl flex flex-col justify-between touch-manipulation overflow-hidden
                 ${!isCurrentMonth ? "bg-gray-50/50 text-gray-400 border-transparent" : "bg-white border-gray-100"}
-                ${isToday(day) ? "ring-2 ring-blue-500 ring-offset-1" : ""}
-                ${dailyLog ? "bg-blue-50/30" : ""}
+                ${isToday(day) ? "ring-3 ring-purple-600 ring-offset-1" : ""}
+                ${dailyLog ? "bg-black-50/30" : ""}
               `}
             >
-              <span className={`text-xs sm:text-sm font-medium ${isToday(day) ? "text-blue-600" : ""}`}>
+              <span className={`text-xs sm:text-sm font-medium ${isToday(day) ? "text-black-600" : ""}`}>
                 {format(day, "d")}
               </span>
 
