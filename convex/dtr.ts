@@ -23,15 +23,24 @@ export const getTotalHours = query({
       .collect();
 
     let totalMilliseconds = 0;
+    const ONE_HOUR_MS = 60 * 60 * 1000; // 1 hour in milliseconds
+
     for (const log of logs) {
       if (log.timeIn && log.timeOut) {
         const start = new Date(log.timeIn).getTime();
         const end = new Date(log.timeOut).getTime();
-        totalMilliseconds += (end - start);
+
+        // Calculate the raw duration
+        const rawDuration = end - start;
+
+        // Subtract 1 hour, but don't let it go below 0
+        const netDuration = Math.max(0, rawDuration - ONE_HOUR_MS);
+
+        totalMilliseconds += netDuration;
       }
     }
     // Return total in hours
-    return totalMilliseconds / (1000 * 60 * 60);
+    return totalMilliseconds / ONE_HOUR_MS;
   },
 });
 
